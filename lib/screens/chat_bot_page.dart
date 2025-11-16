@@ -1,0 +1,118 @@
+import 'package:flutter/material.dart';
+import 'package:hackathonpeeug/services/api_service.dart';
+
+class ChatBotPage extends StatefulWidget {
+  const ChatBotPage({super.key});
+
+  @override
+  State<ChatBotPage> createState() => _ChatBotPageState();
+}
+
+class _ChatBotPageState extends State<ChatBotPage> {
+  final TextEditingController _ctrl = TextEditingController();
+  final List<Map<String, String>> messages = [];
+  bool isload = false;
+  Future<void> sendMessage() async {
+    final msg = _ctrl.text;
+    if (msg.isEmpty) {
+      return;
+    }
+    setState(() {
+      messages.add({"role": "user", "text": msg});
+      isload = true;
+    });
+
+    _ctrl.clear();
+
+    final response = await ApiConnection.getResponse(msg);
+
+    setState(() {
+      messages.add({"role": "gemini", "text": response});
+      isload = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Des Questions ?")),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: messages.length,
+              itemBuilder: (context, pos) {
+                final msg = messages[pos];
+                final isUser = msg["role"] == "user";
+
+                return Align(
+                  alignment: isUser
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
+                  child: Container(
+                    margin: EdgeInsets.only(left: 5, bottom: 12),
+                    padding: EdgeInsets.all(12),
+
+                    decoration: BoxDecoration(
+                      color: isUser ? Colors.blue : Colors.grey[300],
+                      borderRadius: isUser
+                          ? BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              bottomRight: Radius.circular(25),
+                              bottomLeft: Radius.circular(25),
+                            )
+                          : BorderRadius.only(
+                              topRight: Radius.circular(25),
+                              bottomRight: Radius.circular(25),
+                              bottomLeft: Radius.circular(25),
+                            ),
+                    ),
+                    child: Text(
+                      msg["text"]!,
+                      style: TextStyle(
+                        color: isUser ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: _ctrl,
+                    decoration: InputDecoration(
+                      hintText: "Saisie votre message",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(25)),
+                        borderSide: BorderSide(color: Colors.blue, width: 0.5),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              isLoadOrSend(isload),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget isLoadOrSend(bool isload) {
+    return Container(
+      margin: EdgeInsets.all(5),
+      child: isload
+          ? const CircularProgressIndicator()
+          : IconButton(
+              onPressed: sendMessage,
+              icon: Icon(Icons.send, size: 35),
+            ),
+    );
+  }
+}
