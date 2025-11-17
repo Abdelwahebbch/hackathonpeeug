@@ -13,7 +13,29 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   Student? student;
-  bool isLoading = true;
+  bool _isLoading = true;
+
+  Future<void> _logout() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+
+    try {
+      await FirebaseAuth.instance.signOut();
+      if (mounted) {
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lors de la déconnexion : $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   /// Fetch student data from Firestore
   Future<Student?> fetchStudent() async {
@@ -42,17 +64,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> loadStudent() async {
-    setState(() => isLoading = true);
+    setState(() => _isLoading = true);
     final fetchedStudent = await fetchStudent();
     setState(() {
       student = fetchedStudent;
-      isLoading = false;
+      _isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
+    if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
@@ -174,19 +196,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     child: TextButton(
-                      onPressed: () async {
-                        await FirebaseAuth.instance.signOut();
-                        if (mounted) {
-                          Navigator.pushReplacementNamed(context, '/login');
-                        }
-                      },
+                      onPressed: _isLoading ? null : _logout,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.logout, color: Color(0xFFEC4899)),
+                          if (_isLoading)
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          else
+                            const Icon(Icons.logout, color: Color(0xFFEC4899)),
+
                           const SizedBox(width: 8),
                           Text(
-                            'Se déconnecter',
+                            _isLoading ? 'Déconnexion...' : 'Se déconnecter',
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(
                                   color: const Color(0xFFEC4899),
