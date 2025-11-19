@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hackathonpeeug/screens/reusable_widgets.dart';
+import 'package:hackathonpeeug/screens/splash_screen.dart';
 import '../theme/app_theme.dart';
 import '../widgets/failure_message.dart';
 import 'home_page.dart';
@@ -42,17 +43,12 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         if (mounted && _auth.currentUser != null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return HomeScreen();
-              },
-            ),
-          );
+          //TODO load data
+          final data = await UserService().getUserData();
+          if (!mounted) return;
+          Navigator.pushReplacementNamed(context, '/home', arguments: data);
         }
       } catch (e) {
-        print(e);
         if (mounted) {
           setState(() {
             _connectIssue = true;
