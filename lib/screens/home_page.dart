@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hackathonpeeug/models/stat_data.dart';
 import 'package:hackathonpeeug/screens/profile_screen.dart';
 import 'package:hackathonpeeug/static_opp/premium_opp_view.dart';
+import 'package:hackathonpeeug/widgets/failure_message.dart';
 import '../widgets/introduction_card.dart';
 import '../widgets/structure_info.dart';
 
@@ -13,87 +15,23 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late List<Map<String, String>> opps = <Map<String, String>>[
-    {
-      "name": "Flat6Labs Tunis",
-      "shortDesc": "Accélérateur seed & early-stage",
-      "longDescripton":
-          "Flat6Labs est un accélérateur de startups opérant en Tunisie, fournissant du financement, du mentorat, un espace de coworking ainsi que des programmes d’accélération spécialisés. Ils accompagnent des projets innovants en phase d’amorçage.",
-      "services": "Mentorat, financement seed, espace de travail, formation",
-      "contact": "contact@flat6labs.tn",
-      "path": "/flat6labs",
-    },
-    {
-      "name": "StartupGateX",
-      "shortDesc": "Venture studio / Startup Studio",
-      "longDescripton":
-          "StartupGateX est un studio-accélérateur hybride qui aide les startups à développer leur MVP, lever des fonds et accéder à un réseau international. Ils ont une forte présence en Afrique et au Moyen-Orient. :contentReference[oaicite:0]{index=0}",
-      "services":
-          "Construction de MVP, conseils techniques, levée de fonds, studio",
-      "contact": "contact@startupgatex.org",
-      "path": "/startupgatex",
-    },
-    {
-      "name": "CEED Tunisie",
-      "shortDesc": "Organisation non‑gouvernementale d’entrepreneuriat",
-      "longDescripton":
-          "CEED Tunisia soutient les entrepreneurs à fort potentiel à travers du mentorat, des ateliers, des programmes de croissance et un réseau d’experts et d’investisseurs. :contentReference[oaicite:1]{index=1}",
-      "services": "Mentorat, coaching, réseau d'investisseurs, formation",
-      "contact": "ceed.tunisia@example.com",
-      "path": "/ceed-tunisia",
-    },
-    {
-      "name": "CoStarT Sfax",
-      "shortDesc": "Incubateur technologique régional",
-      "longDescripton":
-          "CoStarT est l’incubateur du Technopôle de Sfax, dédié au développement de startups dans le digital et la recherche scientifique, avec un accompagnement adapté aux projets technologiques. :contentReference[oaicite:2]{index=2}",
-      "services": "Incubation, coworking, mentorat, soutien R&D",
-      "contact": "costart.sfax@example.com",
-      "path": "/costart-sfax",
-    },
-    {
-      "name": "Lab’Ess",
-      "shortDesc": "Incubateur d’entrepreneuriat social",
-      "longDescripton":
-          "Lab’Ess soutient les entreprises sociales et les entrepreneurs à impact dans leurs phases de création et de développement. Ils offrent un écosystème pour les projets durables et à impact social. :contentReference[oaicite:3]{index=3}",
-      "services":
-          "Incubation sociale, formation, réseautage, financement à impact",
-      "contact": "labess.tn@example.com",
-      "path": "/labess",
-    },
-    {
-      "name": "I‑StartUp",
-      "shortDesc": "Coaching + Développement MVP",
-      "longDescripton":
-          "I‑StartUp accompagne les jeunes startups en les aidant à développer leur MVP (produit minimum viable) grâce à une équipe technique dédiée, tout en fournissant des conseils entrepreneuriaux. :contentReference[oaicite:4]{index=4}",
-      "services": "Développement produit, mentorat, accompagnement technique",
-      "contact": "info@i-startup.tn",
-      "path": "/i-startup",
-    },
-    {
-      "name": "TunisianStartups",
-      "shortDesc": "Communauté  & Think Tank",
-      "longDescripton":
-          "TunisianStartups est une ONG qui met en relation les entrepreneurs, organise des événements, milite pour des politiques publiques favorables aux startups et propose des ressources pour le développement d’écosystèmes. :contentReference[oaicite:5]{index=5}",
-      "services":
-          "Réseautage, plaidoyer, formation, communauté d’entrepreneurs",
-      "contact": "contact@tunisian-startups.com",
-      "path": "/tunisian-startups",
-    },
-    {
-      "name": "Technopark ElGhazala",
-      "shortDesc": "Technoparc & incubateur",
-      "longDescripton":
-          "Le Technopark ElGhazala est un parc technologique dédié aux startups et aux entreprises innovantes. Il offre des infrastructures, des bureaux, un accompagnement et une connexion aux investisseurs. :contentReference[oaicite:6]{index=6}",
-      "services":
-          "Bureaux, coworking, réseau d’affaires, soutien institutionnel",
-      "contact": "info@technopark-elizghala.tn",
-      "path": "/technopark-elagazala",
-    },
-  ];
+  bool _showPlanError = false;
+
+  void showPlanErrorFunc() {
+    setState(() {
+      _showPlanError = true;
+    });
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        _showPlanError = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final userData = ModalRoute.of(context)!.settings.arguments as Map?;
+    debugPrint("${userData?['Nom']} + HomePage");
     return Scaffold(
       key: _scaffoldKey,
 
@@ -122,10 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: const Text('Mon Profil'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProfileScreen()),
-                  );
+                  Navigator.pushNamed(context, '/profile', arguments: userData);
                 },
               ),
 
@@ -231,11 +166,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                Navigator.push(
+                                Navigator.pushNamed(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ProfileScreen(),
-                                  ),
+                                  '/profile',
+                                  arguments: userData,
                                 );
                               },
                               child: Container(
@@ -254,8 +188,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 24),
-                        IntoductionCard(),
                       ],
                     ),
                   ),
@@ -263,51 +195,40 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: const EdgeInsets.all(12.0),
                   child: Column(
                     children: [
-                      Align(
-                        alignment: Alignment.center,
-                        child: Text(
-                          'les opportunités suggérées  ',
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF4B5563),
-                              ),
-                        ),
-                      ),
                       Expanded(
-                        child: opps.isNotEmpty
+                        child: structures.isNotEmpty
                             ? ListView.builder(
                                 shrinkWrap: true,
-                                itemCount: opps.length,
+                                itemCount: userData?["Plan"] == "Free"
+                                    ? 10
+                                    : structures.length,
                                 itemBuilder: (context, index) {
                                   return StructureInfo(
-                                    structname: opps[index]["name"]!,
-                                    structShortDisc: opps[index]["shortDesc"]!,
+                                    showPaiment: showPlanErrorFunc,
+                                    structname: structures[index].name,
+                                    structShortDisc:
+                                        structures[index].shortDesc,
                                     onPressed: () {
                                       Navigator.push(
                                         context,
-                                        PageRouteBuilder(
-                                          pageBuilder:
-                                              (
-                                                context,
-                                                animation,
-                                                secondaryAnimation,
-                                              ) => PremiumOppView(
-                                                structName:
-                                                    opps[index]["name"]!,
-                                                longDescripton:
-                                                    opps[index]["longDescripton"]!,
-                                                services:
-                                                    opps[index]["services"]!,
-                                                contact:
-                                                    opps[index]["contact"]!,
-                                              ),
+                                        MaterialPageRoute(
+                                          builder: (context) => PremiumOppView(
+                                            structName: structures[index].name,
+                                            longDescription: structures[index]
+                                                .longDescription,
+                                            services:
+                                                structures[index].services,
+                                            contact: structures[index].contact,
+                                          ),
                                         ),
                                       );
                                     },
+                                    isPremium: userData?['Plan'] == "Free"
+                                        ? false
+                                        : true,
                                   );
                                 },
                               )
@@ -321,6 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+          if (_showPlanError) FailureMessage(message: "Buy Premium"),
         ],
       ),
       floatingActionButton: FloatingActionButton(
